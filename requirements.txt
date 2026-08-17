@@ -1,0 +1,2 @@
+# python-dotenv: carrega variaveis do arquivo .env
+python-dotenv>=1.0.0
