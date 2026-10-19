@@ -1,2 +1,7 @@
-# python-dotenv: carrega variaveis do arquivo .env
-python-dotenv>=1.0.0
+# Para RODAR o programa (python baixar_nfse.py ou o .exe ja pronto):
+# nenhuma dependencia externa e necessaria, so a biblioteca padrao do
+# Python (3.11+) e o curl.exe/powershell.exe nativos do Windows.
+#
+# Para GERAR o .exe (so quem mantem o programa precisa disso -- ver
+# build.bat):
+#   pip install pyinstaller

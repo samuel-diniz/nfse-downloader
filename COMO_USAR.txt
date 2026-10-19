@@ -1,0 +1,69 @@
+====================================================================
+ COMO USAR - Download de NFS-e (ADN Nacional)
+====================================================================
+
+O QUE ESSE PROGRAMA FAZ
+------------------------------------------------------------------
+Baixa automaticamente, direto do sistema oficial da Receita (NFS-e
+Nacional), todos os XMLs de NFS-e emitidas por um cliente num
+periodo escolhido, e salva organizado por mes na pasta que voce
+indicar.
+
+Pode rodar quantas vezes quiser: notas ja baixadas nunca sao
+duplicadas.
+
+
+ARQUIVOS DESTA PASTA
+------------------------------------------------------------------
+  baixar_nfse.exe   -> o programa em si. Nao precisa instalar nada.
+  config.ini        -> onde voce preenche os dados do cliente.
+  COMO_USAR.txt      -> este arquivo.
+
+
+PASSO A PASSO
+------------------------------------------------------------------
+1. Abra o arquivo "config.ini" com o Bloco de Notas (clique com o
+   botao direito nele -> Abrir com -> Bloco de Notas).
+
+   Se essa pasta nao tiver um config.ini ainda, so execute o
+   baixar_nfse.exe uma vez: ele cria o arquivo sozinho, com
+   instrucoes escritas dentro dele.
+
+2. Preencha os campos pedidos:
+     - nome do cliente
+     - CNPJ do cliente
+     - periodo de busca (data inicial e final)
+     - pasta onde salvar os XMLs
+
+   Cada campo tem uma explicacao logo acima dele, dentro do proprio
+   arquivo. Nao precisa mexer em mais nada -- o certificado digital
+   e encontrado automaticamente pelo programa, desde que o
+   certificado do cliente ja esteja instalado neste computador.
+
+3. Salve o arquivo (Ctrl+S) e feche o Bloco de Notas.
+
+4. De dois cliques em "baixar_nfse.exe".
+
+5. Uma janela preta vai abrir mostrando o progresso. No final,
+   aparece um resumo com quantas notas foram baixadas. So fechar a
+   janela (ou apertar ENTER) quando terminar.
+
+
+PRECISA DE UM CLIENTE NOVO?
+------------------------------------------------------------------
+Copie esta pasta inteira (com outro nome, ex: "NFS-e - Nome do
+Cliente"), e edite o config.ini da copia com os dados do novo
+cliente. Nao precisa reinstalar nada.
+
+
+SE DER ALGUM ERRO
+------------------------------------------------------------------
+O programa explica o problema em portugues, direto na tela, por
+exemplo:
+  - CNPJ ou data preenchidos errado no config.ini
+  - certificado digital do cliente nao encontrado neste computador
+  - pasta de destino (ex: unidade de rede Z:) fora do ar
+
+A mensagem de erro ja diz o que fazer para corrigir. Se nao
+conseguir resolver, copie a mensagem que apareceu na tela e envie
+para quem cuida do sistema.

@@ -1,0 +1,73 @@
+; ======================================================================
+;  CONFIGURACAO - Download de NFS-e (ADN / NFS-e Nacional)
+; ======================================================================
+;
+;  Como usar:
+;    1. Preencha os campos abaixo (depois do sinal de "=").
+;    2. Salve este arquivo (Ctrl+S) e feche o Bloco de Notas.
+;    3. De dois cliques em "baixar_nfse.exe".
+;
+;  Linhas que comecam com ";" sao apenas explicacoes e sao ignoradas
+;  pelo programa. Um arquivo config.ini serve para UM cliente. Para
+;  baixar de outro cliente, copie a pasta inteira e edite a copia.
+; ======================================================================
+
+
+[CLIENTE]
+
+; Nome do cliente. Serve so para identificacao nas mensagens do
+; programa -- nao influencia o download.
+nome =
+
+; CNPJ do cliente, somente numeros (sem ponto, barra ou traco).
+; Exemplo: 12345678000199
+cnpj =
+
+
+[CERTIFICADO]
+
+; NA MAIORIA DOS CASOS, NAO PRECISA PREENCHER NADA AQUI.
+;
+; O programa procura sozinho, no repositorio de certificados do Windows
+; deste computador, o certificado digital A1 cujo CNPJ bate com o
+; informado acima em [CLIENTE] -> cnpj. E o mesmo certificado usado
+; para acessar o e-CAC, por exemplo -- ele precisa estar instalado
+; neste computador, no usuario do Windows que vai rodar o programa.
+;
+; So preencha "thumbprint" abaixo se o programa avisar que:
+;   a) encontrou mais de um certificado valido para o mesmo CNPJ, ou
+;   b) voce quer forcar um certificado especifico.
+; Nesses casos, copie o "thumbprint" que o proprio programa mostrar na
+; mensagem e cole aqui.
+thumbprint =
+
+
+[PERIODO]
+
+; Periodo de busca das notas, pela DATA DE EMISSAO.
+; Formato obrigatorio: AAAA-MM-DD (ano-mes-dia)
+;
+; Exemplo para baixar o mes de agosto de 2026 inteiro:
+;   data_inicio = 2026-08-01
+;   data_fim    = 2026-08-31
+data_inicio =
+data_fim =
+
+
+[DESTINO]
+
+; Pasta onde os XMLs serao salvos. Use o caminho completo, como aparece
+; na barra de enderecos do Windows Explorer. O programa cria sozinho,
+; dentro dessa pasta, uma subpasta para cada mes (01, 02, 03...).
+;
+; Exemplo:
+;   pasta = Z:\FISCAL\2026\NFSE\NOME DO CLIENTE\Prestacao
+pasta =
+
+
+[AMBIENTE]
+
+; Deixe "producao" para o uso normal do dia a dia (notas fiscais reais).
+; So mude para "homologacao" se for pedido explicitamente para testar
+; antes de usar em producao.
+tipo = producao

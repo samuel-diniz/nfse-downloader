@@ -1,6 +1,8 @@
 # =============================================================================
-# Variaveis de ambiente (contem dados sensiveis: CNPJ, thumbprint, caminhos)
+# Configuracao por cliente (contem dados sensiveis: CNPJ, thumbprint, caminhos)
+# Use o config.ini.example como modelo -- ele sim e versionado.
 # =============================================================================
+config.ini
 .env
 .env.local
 .env.*.local
@@ -33,7 +35,13 @@ __pycache__/
 *.so
 .Python
 build/
+build_temp/
 dist/
+
+# Executavel e pacote de release: publicados como asset da Release no GitHub,
+# nao versionados (binario no historico do git fica la para sempre).
+*.exe
+*.zip
 *.egg-info/
 .pytest_cache/
 .coverage
