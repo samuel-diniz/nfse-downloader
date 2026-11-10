@@ -26,19 +26,27 @@ cnpj =
 
 [CERTIFICADO]
 
-; NA MAIORIA DOS CASOS, NAO PRECISA PREENCHER NADA AQUI.
+; Existem DOIS casos. Veja qual e o do seu cliente:
 ;
-; O programa procura sozinho, no repositorio de certificados do Windows
-; deste computador, o certificado digital A1 cujo CNPJ bate com o
-; informado acima em [CLIENTE] -> cnpj. E o mesmo certificado usado
-; para acessar o e-CAC, por exemplo -- ele precisa estar instalado
-; neste computador, no usuario do Windows que vai rodar o programa.
+; CASO 1 - O CLIENTE TEM O PROPRIO CERTIFICADO (e-CNPJ A1), instalado
+;          neste computador, no usuario do Windows que roda o programa.
+;          --> Deixe "thumbprint" EM BRANCO. O programa procura sozinho,
+;              no repositorio de certificados do Windows, o certificado
+;              cujo CNPJ bate com o informado acima em [CLIENTE] -> cnpj.
 ;
-; So preencha "thumbprint" abaixo se o programa avisar que:
-;   a) encontrou mais de um certificado valido para o mesmo CNPJ, ou
-;   b) voce quer forcar um certificado especifico.
-; Nesses casos, copie o "thumbprint" que o proprio programa mostrar na
-; mensagem e cole aqui.
+; CASO 2 - ACESSO POR PROCURACAO: o cliente NAO tem certificado e deu
+;          procuracao eletronica ao CPF ou CNPJ do SEU certificado.
+;          --> Preencha "thumbprint" com o do SEU certificado (o do
+;              contador, e nao o do cliente). Em [CLIENTE] -> cnpj
+;              continua o CNPJ do CLIENTE.
+;
+; Como achar o thumbprint (impressao digital) de um certificado:
+;   Win+R > certmgr.msc > Pessoal > Certificados > de dois cliques no
+;   certificado > aba "Detalhes" > campo "Impressao digital". Copie os
+;   40 caracteres e cole aqui (espacos sao ignorados).
+;
+; Tambem preencha o thumbprint se o programa avisar que encontrou mais
+; de um certificado valido para o mesmo CNPJ.
 thumbprint =
 
 
@@ -54,15 +62,33 @@ data_inicio =
 data_fim =
 
 
+[SAIDA]
+
+; O que baixar de cada nota:
+;   xml   = so o arquivo XML (o documento oficial da nota)      [padrao]
+;   pdf   = so o PDF (DANFSe), gerado pelo programa a partir do XML
+;   ambos = o XML e o PDF
+;
+; O PDF e uma representacao grafica gerada pelo proprio programa, seguindo
+; o layout da Nota Tecnica 008/2026 -- nao e baixado da Receita (a API de
+; PDF da Receita foi desativada). O documento com validade juridica
+; continua sendo o XML.
+formato = xml
+
+
 [DESTINO]
 
-; Pasta onde os XMLs serao salvos. Use o caminho completo, como aparece
+; Pasta onde os arquivos serao salvos. Use o caminho completo, como aparece
 ; na barra de enderecos do Windows Explorer. O programa cria sozinho,
 ; dentro dessa pasta, uma subpasta para cada mes (01, 02, 03...).
 ;
 ; Exemplo:
 ;   pasta = Z:\FISCAL\2026\NFSE\NOME DO CLIENTE\Prestacao
 pasta =
+
+; (Opcional) Pasta separada para os PDFs. Se ficar em branco, os PDFs vao
+; para a mesma pasta acima, ao lado dos XMLs.
+pasta_pdf =
 
 
 [AMBIENTE]
