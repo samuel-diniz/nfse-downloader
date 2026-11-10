@@ -10,7 +10,7 @@ A autenticação é por **mTLS com certificado digital A1** lido diretamente do
 sistema operacional (não há `.pfx` solto no disco e não há senha em lugar
 nenhum).
 
-> Versão **2.0.0** (em preparação). Histórico em [`CHANGELOG.md`](CHANGELOG.md).
+> Versão **2.0.0**. Histórico em [`CHANGELOG.md`](CHANGELOG.md).
 > Instruções em linguagem simples para quem opera o programa:
 > [`COMO_USAR.txt`](COMO_USAR.txt).
 

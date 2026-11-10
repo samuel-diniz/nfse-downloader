@@ -3,7 +3,7 @@
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
-## [2.0.0] — em preparação
+## [2.0.0] — 2026-11-10
 
 ### Adicionado
 - **Modo em lote** (`baixar_lote.py` e o atalho `executar_lote.bat`): lê uma lista
