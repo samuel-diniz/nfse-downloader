@@ -108,6 +108,87 @@ class TestArquivos(unittest.TestCase):
         self.assertTrue((self.tmp / "03" / f"{CHAVE}.xml").exists())
 
 
+class TestChaveDeAcesso(unittest.TestCase):
+    """A chave vem da API e vira nome de arquivo: so 50 digitos podem passar."""
+
+    MALICIOSAS = ("..\\..\\fora_da_pasta", "../../fora_da_pasta", "C:\\fora", "abc", "", "1" * 49, "1" * 51,
+                  "1" * 49 + "x", "1" * 50 + "\n", "١" * 50)
+
+    def setUp(self):
+        nf._INDICE_PASTAS.clear()
+        self.raiz = pasta_temp()
+        self.destino = self.raiz / "cliente"
+        self.destino.mkdir()
+        self.dt = datetime(2026, 10, 15)
+
+    def arquivos_fora_do_cliente(self):
+        return [p for p in self.raiz.rglob("*") if p.is_file() and self.destino not in p.parents]
+
+    def test_chave_valida(self):
+        self.assertTrue(nf.chave_valida(CHAVE))
+        for ruim in self.MALICIOSAS + (None, 123):
+            self.assertFalse(nf.chave_valida(ruim), repr(ruim))
+
+    def test_salvar_xml_recusa_chave_invalida(self):
+        for ruim in self.MALICIOSAS:
+            with self.assertRaises(ValueError, msg=repr(ruim)):
+                nf.salvar_xml(XML, ruim, self.dt, self.destino)
+        self.assertEqual(self.arquivos_fora_do_cliente(), [])
+        self.assertEqual(list(self.destino.rglob("*")), [])
+
+    def test_salvar_pdf_recusa_chave_invalida(self):
+        gerador = mock.Mock()
+        for ruim in self.MALICIOSAS:
+            with self.assertRaises(ValueError, msg=repr(ruim)):
+                nf.salvar_pdf(gerador, XML, ruim, self.dt, self.destino)
+        gerador.gerar_pdf.assert_not_called()
+        self.assertEqual(self.arquivos_fora_do_cliente(), [])
+
+    def test_download_conta_erro_e_nao_grava_fora_da_pasta(self):
+        with mock.patch.object(nf, "CURL_EXE", sys.executable):
+            pagina = {"StatusProcessamento": "DOCUMENTOS_LOCALIZADOS", "LoteDFe": [
+                documento(1, "..\\..\\fora_da_pasta", XML),
+                documento(2, "../../fora_da_pasta", XML),
+                documento(3, CHAVE, XML),
+            ]}
+            config = nf.Configuracao("Teste", CNPJ, "", datetime(2026, 10, 1), datetime(2026, 10, 31),
+                                     self.destino, self.destino, "xml", False)
+            with mock.patch.object(nf, "chamar_com_retry", return_value=(200, json.dumps(pagina))):
+                r = nf.executar_download(config, "T", "cert")
+        self.assertEqual((r.erros, r.xml_novos), (2, 1))
+        self.assertTrue(r.completo)
+        self.assertEqual(self.arquivos_fora_do_cliente(), [])
+        self.assertTrue((self.destino / "10" / f"{CHAVE}.xml").exists())
+
+
+class TestLimiteDeTempo(unittest.TestCase):
+    def test_devolve_o_resultado_quando_responde(self):
+        self.assertEqual(nf.com_limite_de_tempo(lambda x: x * 2, 21, 5), 42)
+
+    def test_devolve_o_padrao_quando_demora(self):
+        import time as tempo
+        inicio = tempo.perf_counter()
+        r = nf.com_limite_de_tempo(lambda _: tempo.sleep(5) or True, None, 0.2)
+        self.assertFalse(r)
+        self.assertLess(tempo.perf_counter() - inicio, 2)
+
+    def test_erro_na_funcao_vira_padrao(self):
+        def falha(_):
+            raise OSError("rede caiu")
+        self.assertEqual(nf.com_limite_de_tempo(falha, None, 5, padrao="x"), "x")
+
+    def test_pasta_acessivel(self):
+        self.assertTrue(nf.pasta_acessivel(pasta_temp()))
+        self.assertFalse(nf.pasta_acessivel(pasta_temp() / "nao_existe"))
+
+    def test_pasta_que_trava_conta_como_inacessivel(self):
+        import time as tempo
+        with mock.patch.object(nf.Path, "exists", lambda self: tempo.sleep(5) or True):
+            inicio = tempo.perf_counter()
+            self.assertFalse(nf.pasta_acessivel("Z:\\qualquer", limite=0.2))
+        self.assertLess(tempo.perf_counter() - inicio, 2)
+
+
 class TestRetentativas(unittest.TestCase):
     def setUp(self):
         patcher = mock.patch.object(nf.time, "sleep")

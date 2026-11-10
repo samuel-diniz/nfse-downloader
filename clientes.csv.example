@@ -1,0 +1,4 @@
+ativo;nome;cnpj;pasta;pasta_pdf;thumbprint;formato;obs
+sim;Exemplo Comercio;12.345.678/0001-99;Z:\FISCAL\101 - EXEMPLO COMERCIO;;;ambos;certificado proprio do cliente
+sim;Exemplo Servicos;98.765.432/0001-00;Z:\FISCAL\102 - EXEMPLO SERVICOS\Prestacao;;A1B2C3D4E5F60718293A4B5C6D7E8F9012345678;;procuracao: certificado de quem tem a procuracao
+nao;Cliente Pausado;11.222.333/0001-44;Z:\FISCAL\103 - CLIENTE PAUSADO;;;;nao sera processado

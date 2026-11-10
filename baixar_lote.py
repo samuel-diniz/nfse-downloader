@@ -33,7 +33,7 @@ import re
 import sys
 import time
 import unicodedata
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from functools import lru_cache
 from pathlib import Path
@@ -548,12 +548,29 @@ def processar_cliente(cliente: Cliente, ini: date, fim: date, padroes: Padroes, 
     return linha
 
 
-def validar_antes(ativos: list, padroes: Padroes) -> list:
-    """Retorna [(cliente, pasta_traduzida, existe)] para as pastas XML/PDF de cada cliente ativo."""
+def linha_pasta_inacessivel(cliente: Cliente, pasta: str, padroes: Padroes) -> LinhaRelatorio:
+    """Linha de erro para um cliente cuja pasta ja foi dada como inacessivel na verificacao previa."""
+    msg = f"pasta de destino inexistente ou inacessivel: {pasta}"
+    log.error("%s: %s", cliente.nome, msg)
+    return LinhaRelatorio(cliente, formato=cliente.formato or padroes.formato, status="ERRO", obs=msg)
+
+
+def validar_antes(ativos: list, padroes: Padroes, limite: float = None) -> list:
+    """
+    Retorna [(cliente, pasta_traduzida, acessivel)] para a pasta de cada cliente ativo.
+    A raiz (unidade ou \\\\servidor\\compartilhamento) e testada uma unica vez, com limite de
+    tempo: se ela nao responde, todas as pastas dela contam como inacessiveis sem esperar de
+    novo (um servidor fora do ar custaria ~40 s por cliente).
+    """
+    raizes = {}  # raiz -> responde?
     saida = []
     for c in ativos:
         pasta = traduzir_unidade(c.pasta, padroes.unidade, padroes.caminho_rede)
-        saida.append((c, pasta, Path(pasta).exists()))
+        raiz = Path(pasta).anchor
+        if raiz and raiz not in raizes:
+            raizes[raiz] = nf.pasta_acessivel(raiz, limite)
+        ok = raizes[raiz] if raiz else True
+        saida.append((c, pasta, ok and nf.pasta_acessivel(pasta, limite)))
     return saida
 
 
@@ -606,6 +623,7 @@ def avisos_de_certificado(linhas: list) -> list:
 
 def simular(ativos: list, ini: date, fim: date, padroes: Padroes, refazer: bool) -> None:
     print(f"SIMULACAO (nada sera baixado nem gravado). Periodo: {fmt_data(ini)} a {fmt_data(fim)}")
+    acesso = {c.cnpj: ok for c, _, ok in validar_antes(ativos, padroes)}
     for c in ativos:
         formato = c.formato or padroes.formato
         pasta = traduzir_unidade(c.pasta, padroes.unidade, padroes.caminho_rede)
@@ -619,7 +637,7 @@ def simular(ativos: list, ini: date, fim: date, padroes: Padroes, refazer: bool)
         pasta_pdf = traduzir_unidade(c.pasta_pdf, padroes.unidade, padroes.caminho_rede) if c.pasta_pdf else pasta
         nsu = 0 if refazer else nsu_para_retomar(carregar_estado(c.cnpj), ini, fim,
                                                  pasta if quer_xml else None, pasta_pdf if quer_pdf else None)
-        print(f"- {c.nome} | formato={formato} | pasta {'ok' if Path(pasta).exists() else 'NAO ENCONTRADA'} | "
+        print(f"- {c.nome} | formato={formato} | pasta {'ok' if acesso[c.cnpj] else 'NAO ENCONTRADA'} | "
               f"certificado: {cert} | comeca do NSU {nsu}")
 
 
@@ -682,7 +700,9 @@ def principal(argv=None) -> int:
         simular(ativos, ini, fim, padroes, args.refazer)
         return 0
 
+    print("Verificando acesso as pastas de destino...")
     verificacao = validar_antes(ativos, padroes)
+    inacessiveis = {c.cnpj: pasta for c, pasta, ok in verificacao if not ok}
     if not any(ok for _, _, ok in verificacao):
         raise ConfigError(["Nenhuma das pastas de destino esta acessivel.",
                            "Confira se o computador do servidor esta ligado, a rede conectada e a unidade "
@@ -701,6 +721,9 @@ def principal(argv=None) -> int:
     resultados = {}
     for i, cliente in enumerate(ativos, start=1):
         log.info("==================== [%d/%d] %s ====================", i, len(ativos), cliente.nome)
+        if cliente.cnpj in inacessiveis:
+            resultados[cliente.cnpj] = linha_pasta_inacessivel(cliente, inacessiveis[cliente.cnpj], padroes)
+            continue
         resultados[cliente.cnpj] = processar_cliente(cliente, ini, fim, padroes, args.refazer)
         if i < len(ativos):
             time.sleep(padroes.pausa)

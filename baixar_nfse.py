@@ -45,6 +45,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 import traceback
 import xml.etree.ElementTree as ET
@@ -67,6 +68,11 @@ NSU_INICIAL = 0
 MAX_TENTATIVAS = 6
 BACKOFF_SEGUNDOS = 2        # base da espera apos HTTP 429 (dobra a cada tentativa)
 BACKOFF_REDE_SEGUNDOS = 3   # base da espera apos falha de rede (3, 6, 12, 24, 48 s)
+LIMITE_CHECAGEM_PASTA = 15  # segundos: tempo maximo para saber se uma pasta/unidade de rede responde
+
+# A chave de acesso da NFS-e tem exatamente 50 digitos. Como ela vira nome de arquivo,
+# qualquer outra coisa (ex.: "..\\..\\x") e rejeitada antes de tocar no disco.
+_PADRAO_CHAVE = re.compile(r"[0-9]{50}")  # [0-9] e nao \d: \d aceita digitos de outros alfabetos
 
 VERSAO = "2.0.0"
 
@@ -569,6 +575,42 @@ def _nomes_na_pasta(pasta: Path) -> set:
     return _INDICE_PASTAS[chave]
 
 
+def chave_valida(chave) -> bool:
+    """True se `chave` e uma chave de acesso de NFS-e: exatamente 50 digitos."""
+    return isinstance(chave, str) and _PADRAO_CHAVE.fullmatch(chave) is not None
+
+
+def _exigir_chave(chave) -> None:
+    if not chave_valida(chave):
+        raise ValueError(f"chave de acesso invalida (esperados 50 digitos): {str(chave)[:60]!r}")
+
+
+def com_limite_de_tempo(funcao, argumento, limite: float, padrao=False):
+    """
+    Roda `funcao(argumento)` e devolve o resultado, ou `padrao` se passar de `limite` segundos
+    (ou se der erro). Uma unidade de rede fora do ar pode travar o Windows por ~40 s numa unica
+    consulta; a thread e "daemon" para nao segurar o encerramento do programa.
+    """
+    resultado = [padrao]
+
+    def trabalho():
+        try:
+            resultado[0] = funcao(argumento)
+        except Exception:
+            resultado[0] = padrao
+
+    fio = threading.Thread(target=trabalho, daemon=True)
+    fio.start()
+    fio.join(limite)
+    return padrao if fio.is_alive() else resultado[0]
+
+
+def pasta_acessivel(pasta, limite: float = None) -> bool:
+    """True se a pasta existe e responde dentro do limite de tempo."""
+    return com_limite_de_tempo(lambda p: Path(p).exists(), pasta,
+                               LIMITE_CHECAGEM_PASTA if limite is None else limite)
+
+
 def ja_existe(pasta_mes: Path, chave_acesso: str, extensao: str) -> bool:
     """
     True se a pasta ja tem arquivo dessa nota: nome igual a chave, ou chave seguida de
@@ -583,6 +625,7 @@ def salvar_xml(xml_texto: str, chave_acesso: str, data_emissao: datetime, pasta_
     Salva o XML na subpasta do mes de emissao. Retorna True se salvou,
     False se a nota ja existia na pasta (pulada).
     """
+    _exigir_chave(chave_acesso)
     pasta_mes = pasta_destino / f"{data_emissao.month:02d}"
     if ja_existe(pasta_mes, chave_acesso, ".xml"):
         return False
@@ -615,6 +658,7 @@ def salvar_pdf(gerador, xml_texto: str, chave_acesso: str, data_emissao: datetim
     renomeia, para uma falha no meio nunca deixar um PDF incompleto que seria pulado
     nas execucoes seguintes.
     """
+    _exigir_chave(chave_acesso)
     pasta_mes = pasta_destino / f"{data_emissao.month:02d}"
     if ja_existe(pasta_mes, chave_acesso, ".pdf"):
         return False
@@ -685,7 +729,7 @@ def executar_download(config: Configuracao, thumbprint: str, descricao_cert: str
                     f"Detalhe: {exc}",
                     "Verifique se a unidade de rede esta conectada e se o caminho no config.ini esta correto.",
                 ])
-        elif not pasta.exists():
+        elif not pasta_acessivel(pasta):
             raise ConfigError([
                 f"A pasta de destino nao existe ou nao esta acessivel: {pasta}",
                 "Confira o caminho na lista de clientes e se a unidade de rede esta conectada.",
@@ -771,6 +815,11 @@ def executar_download(config: Configuracao, thumbprint: str, descricao_cert: str
 
             if not chave_acesso or not conteudo_b64:
                 log.warning("Documento com NSU=%s sem chave de acesso ou conteudo XML; pulando.", nsu)
+                res.erros += 1
+                continue
+
+            if not chave_valida(chave_acesso):
+                log.error("Documento com NSU=%s tem chave de acesso invalida (%r); pulando.", nsu, str(chave_acesso)[:60])
                 res.erros += 1
                 continue
 
