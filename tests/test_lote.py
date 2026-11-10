@@ -168,6 +168,15 @@ class TestClientesCsv(unittest.TestCase):
         self.assertIn("faltam as colunas", ctx.exception.mensagens[0])
 
 
+class TestModeloClientes(unittest.TestCase):
+    def test_clientes_csv_example_e_valido(self):
+        modelo = Path(__file__).resolve().parent.parent / "clientes.csv.example"
+        clientes, problemas = bl.ler_clientes(modelo)
+        self.assertEqual(problemas, [])
+        self.assertEqual([c.ativo for c in clientes], [True, True, False])
+        self.assertEqual(clientes[1].thumbprint, "A1B2C3D4E5F60718293A4B5C6D7E8F9012345678")
+
+
 class TestFiltro(unittest.TestCase):
     def setUp(self):
         self.lista = [bl.Cliente(2, "EXEMPLO COMERCIO LTDA", "12345678000199", "x", num="10"),
@@ -300,6 +309,47 @@ class TestProcessarCliente(unittest.TestCase):
         linha, _ = self.processar(erro=RuntimeError("boom"))
         self.assertEqual(linha.status, "ERRO")
         self.assertIn("boom", linha.obs)
+
+
+class TestValidarAntes(unittest.TestCase):
+    """Verificacao previa das pastas: a raiz de rede e testada uma unica vez, com limite de tempo."""
+
+    def setUp(self):
+        self.padroes = bl.Padroes("mes_anterior", None, None, "xml", "", "Z:", "", False, 0, 0)
+
+    def clientes(self, *pastas):
+        return [bl.Cliente(i + 2, f"Cliente {i}", f"{i:014d}", p) for i, p in enumerate(pastas)]
+
+    def test_pastas_existentes_e_inexistentes(self):
+        raiz = pasta_temp()
+        (raiz / "A").mkdir()
+        resultado = bl.validar_antes(self.clientes(str(raiz / "A"), str(raiz / "B")), self.padroes, limite=5)
+        self.assertEqual([ok for _, _, ok in resultado], [True, False])
+
+    def test_servidor_fora_do_ar_nao_espera_por_cliente(self):
+        import time as tempo
+        chamadas = []
+
+        def exists_lento(self):
+            chamadas.append(str(self))
+            tempo.sleep(5)
+            return True
+
+        clientes = self.clientes(*[f"\\\\SERVIDOR-FORA\\Clientes\\C{i}" for i in range(20)])
+        with mock.patch.object(bl.nf.Path, "exists", exists_lento):
+            inicio = tempo.perf_counter()
+            resultado = bl.validar_antes(clientes, self.padroes, limite=0.2)
+            gasto = tempo.perf_counter() - inicio
+        self.assertFalse(any(ok for _, _, ok in resultado))
+        self.assertEqual(len(chamadas), 1)   # so a raiz foi consultada
+        self.assertLess(gasto, 2)            # 20 clientes sem esperar 20 vezes
+
+    def test_linha_de_pasta_inacessivel(self):
+        cliente = self.clientes("Z:\\X")[0]
+        linha = bl.linha_pasta_inacessivel(cliente, "Z:\\X", self.padroes)
+        self.assertEqual(linha.status, "ERRO")
+        self.assertIn("Z:\\X", linha.obs)
+        self.assertIn(linha.status, bl.STATUS_FALHA)
 
 
 class TestEntrada(unittest.TestCase):

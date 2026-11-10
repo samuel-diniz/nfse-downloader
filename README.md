@@ -64,7 +64,9 @@ Python). Na primeira execução o programa cria o `lote.ini` na pasta de dados.
 ### `clientes.csv`
 
 Abre no Excel (CSV com `;` ou `,`, em UTF-8 ou ANSI). Só `nome`, `cnpj` e `pasta`
-são obrigatórios; as colunas opcionais podem ser omitidas ou ficar em branco:
+são obrigatórios; as colunas opcionais podem ser omitidas ou ficar em branco.
+Use o [`clientes.csv.example`](clientes.csv.example) como modelo (copie, renomeie
+para `clientes.csv` e troque pelos seus clientes):
 
 ```text
 ativo;nome;cnpj;pasta;pasta_pdf;thumbprint;formato;obs
@@ -238,6 +240,7 @@ danfse.py           gerador do PDF (reportlab)
 danfse_logo.py      logomarca oficial embutida (base64)
 ibge_municipios.py  tabela de municípios do IBGE
 config.ini.example  modelo do config.ini
+clientes.csv.example  modelo da lista de clientes do lote
 executar_lote.bat   atalho do lote
 build.bat           gera os executáveis
 tests/              testes automatizados (+ fixtures com XML fictício)

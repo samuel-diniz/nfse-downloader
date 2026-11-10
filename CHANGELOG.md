@@ -32,8 +32,20 @@ Versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   para manter `clientes.csv`, `lote.ini`, estado, logs e relatórios fora do
   repositório. `--versao` mostra a versão.
 - Testes automatizados (`tests/`), `.gitattributes` e este changelog.
+- `clientes.csv.example`: modelo da lista de clientes (dados fictícios).
+- Teste automático no GitHub Actions (`.github/workflows/testes.yml`), em Windows.
+
+### Segurança
+- A **chave de acesso** devolvida pela API só é aceita se tiver exatamente 50
+  dígitos. Como ela vira nome de arquivo, uma chave com `..\` poderia gravar
+  fora da pasta do cliente; agora a nota é recusada, contada como erro e
+  registrada no log.
 
 ### Alterado
+- **Verificação das pastas no lote:** a unidade/servidor de rede é testada uma
+  única vez, com limite de 15 s. Com o servidor fora do ar, o lote avisa na
+  hora (antes esperava ~40 s por cliente, cerca de 18 min com 25 clientes), e
+  os clientes dessa raiz saem como `ERRO` no relatório sem nova espera.
 - **Mais paciência com o ADN:** até 6 tentativas, com esperas que dobram
   (3, 6, 12, 24, 48 s) em falhas de rede, e a mensagem real do `curl.exe`
   passa a aparecer no log (antes só aparecia "codigo 56").

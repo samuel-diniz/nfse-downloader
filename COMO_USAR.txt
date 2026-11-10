@@ -20,7 +20,8 @@ ARQUIVOS DESTA PASTA
   baixar_lote.exe   -> baixa as notas de VARIOS clientes de uma vez
                        (veja "VARIOS CLIENTES DE UMA VEZ" mais abaixo).
   executar_lote.bat -> atalho de dois cliques para o baixar_lote.exe.
-  clientes.csv      -> a lista de clientes do lote (voce cria).
+  clientes.csv      -> a lista de clientes do lote (voce cria; use o
+                       clientes.csv.example como modelo).
   lote.ini          -> ajustes do lote (criado sozinho na 1a vez).
   COMO_USAR.txt      -> este arquivo.
 
@@ -78,8 +79,8 @@ VARIOS CLIENTES DE UMA VEZ (MODO EM LOTE)
 ------------------------------------------------------------------
 Em vez de preparar um config.ini por cliente, o lote le uma lista:
 
-1. Crie o arquivo clientes.csv (pode montar no Excel e salvar como
-   CSV). Colunas obrigatorias: nome, cnpj, pasta. A "pasta" e onde
+1. Crie o arquivo clientes.csv (copie o clientes.csv.example e troque
+   pelos seus clientes, ou monte no Excel e salve como CSV). Colunas obrigatorias: nome, cnpj, pasta. A "pasta" e onde
    ficam as pastas dos meses (01, 02, 03...) daquele cliente.
    Colunas opcionais: ativo (nao = pula o cliente), thumbprint,
    formato (xml, pdf ou ambos) e pasta_pdf.
