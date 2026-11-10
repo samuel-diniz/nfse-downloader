@@ -1,0 +1,24 @@
+# Fim de linha: o repositorio guarda sempre LF; na pasta de trabalho cada tipo de
+# arquivo usa o que for melhor para quem o abre.
+* text=auto
+
+# Codigo e documentacao tecnica
+*.py                text eol=lf
+*.md                text eol=lf
+*.xml               text eol=lf
+requirements.txt    text eol=lf
+LICENSE             text eol=lf
+.gitignore          text eol=lf
+.gitattributes      text eol=lf
+
+# Arquivos que a equipe abre no Bloco de Notas ou executa no Windows
+*.bat               text eol=crlf
+*.ini               text eol=crlf
+*.example           text eol=crlf
+COMO_USAR.txt       text eol=crlf
+
+# Binarios (nunca converter)
+*.exe               binary
+*.zip               binary
+*.png               binary
+*.pdf               binary

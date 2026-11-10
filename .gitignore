@@ -21,6 +21,8 @@ config.ini
 # XMLs baixados (dados fiscais reais dos contribuintes)
 # =============================================================================
 *.xml
+# Unica excecao: XMLs FICTICIOS usados pelos testes
+!tests/fixtures/*.xml
 notas_baixadas/
 xmls/
 saida/
@@ -74,3 +76,9 @@ desktop.ini
 # =============================================================================
 *.log
 logs/
+
+# Modo em lote: dados de clientes e arquivos gerados na execucao (nao versionar)
+clientes.csv
+lote.ini
+estado/
+relatorios/

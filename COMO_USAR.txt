@@ -15,8 +15,13 @@ duplicadas.
 
 ARQUIVOS DESTA PASTA
 ------------------------------------------------------------------
-  baixar_nfse.exe   -> o programa em si. Nao precisa instalar nada.
-  config.ini        -> onde voce preenche os dados do cliente.
+  baixar_nfse.exe   -> baixa as notas de UM cliente. Nao precisa instalar nada.
+  config.ini        -> onde voce preenche os dados desse cliente.
+  baixar_lote.exe   -> baixa as notas de VARIOS clientes de uma vez
+                       (veja "VARIOS CLIENTES DE UMA VEZ" mais abaixo).
+  executar_lote.bat -> atalho de dois cliques para o baixar_lote.exe.
+  clientes.csv      -> a lista de clientes do lote (voce cria).
+  lote.ini          -> ajustes do lote (criado sozinho na 1a vez).
   COMO_USAR.txt      -> este arquivo.
 
 
@@ -33,12 +38,15 @@ PASSO A PASSO
      - nome do cliente
      - CNPJ do cliente
      - periodo de busca (data inicial e final)
-     - pasta onde salvar os XMLs
+     - pasta onde salvar os arquivos
+     - (opcional) o que baixar: so XML, so PDF ou os dois
+       (veja "XML, PDF OU OS DOIS" mais abaixo)
 
    Cada campo tem uma explicacao logo acima dele, dentro do proprio
-   arquivo. Nao precisa mexer em mais nada -- o certificado digital
-   e encontrado automaticamente pelo programa, desde que o
-   certificado do cliente ja esteja instalado neste computador.
+   arquivo. Se o cliente tem certificado digital proprio instalado
+   neste computador, nao precisa mexer em mais nada -- o programa
+   encontra o certificado sozinho. Se o cliente NAO tem certificado,
+   veja a secao "CLIENTE SEM CERTIFICADO (PROCURACAO)" mais abaixo.
 
 3. Salve o arquivo (Ctrl+S) e feche o Bloco de Notas.
 
@@ -49,11 +57,101 @@ PASSO A PASSO
    janela (ou apertar ENTER) quando terminar.
 
 
+XML, PDF OU OS DOIS
+------------------------------------------------------------------
+No config.ini, em [SAIDA] -> formato, escolha:
+  xml   -> so o XML (o documento oficial da nota)        [padrao]
+  pdf   -> so o PDF
+  ambos -> o XML e o PDF
+
+O PDF e gerado pelo proprio programa a partir do XML, no modelo
+oficial (DANFSe). Ele nao e baixado da Receita, porque o servico de
+PDF da Receita foi desativado. O documento com validade juridica
+continua sendo o XML.
+
+ATENCAO: se a pasta do cliente ja tem PDFs salvos com outros nomes
+(ex.: "N F No 148.pdf"), o PDF gerado ficara ao lado, duplicado.
+Use pdf ou ambos so nos clientes em que isso for desejado.
+
+
+VARIOS CLIENTES DE UMA VEZ (MODO EM LOTE)
+------------------------------------------------------------------
+Em vez de preparar um config.ini por cliente, o lote le uma lista:
+
+1. Crie o arquivo clientes.csv (pode montar no Excel e salvar como
+   CSV). Colunas obrigatorias: nome, cnpj, pasta. A "pasta" e onde
+   ficam as pastas dos meses (01, 02, 03...) daquele cliente.
+   Colunas opcionais: ativo (nao = pula o cliente), thumbprint,
+   formato (xml, pdf ou ambos) e pasta_pdf.
+   Dica: deixe o CNPJ com pontos e barra e a coluna como Texto, para
+   o Excel nao transformar em numero.
+
+2. De dois cliques em executar_lote.bat. O programa pergunta o
+   periodo: aperte ENTER para o mes anterior, ou digite outro, por
+   exemplo  01/09/2026 a 30/09/2026  ou apenas  09/2026.
+
+3. No fim aparece uma tabela com o resultado de cada cliente e o
+   programa grava um relatorio (pasta "relatorios") e um log (pasta
+   "logs"). Um cliente com problema nao atrapalha os outros.
+
+Significado dos resultados:
+  OK          -> concluido.
+  SEM NOTAS   -> a Receita nao devolveu nenhuma nota. Confira o CNPJ,
+                 o certificado e a procuracao: a Receita responde igual
+                 para "nao ha notas" e "sem acesso".
+  COM ERROS   -> algumas notas deram erro (veja o log).
+  INCOMPLETO  -> a Receita ficou instavel; rode de novo mais tarde.
+  ERRO        -> problema do cliente (pasta, certificado...). A
+                 mensagem explica o que corrigir.
+
+Para testar sem baixar nada, rode  executar_lote.bat --simular .
+Para um cliente so:  executar_lote.bat --cliente "parte do nome" .
+Rodar de novo o mesmo periodo e rapido: o programa lembra ate onde ja
+leu. Para ler tudo de novo:  executar_lote.bat --refazer .
+
+Os dados de clientes (clientes.csv, lote.ini) ficam ao lado do
+programa. Se a equipe preferir guardar em outra pasta, use
+--dados "C:\caminho\da\pasta" ou defina a variavel NFSE_DADOS.
+
+Se o cliente nao tem certificado proprio, mas deu procuracao ao seu
+certificado, preencha na lista o "thumbprint" do SEU certificado (ou
+no lote.ini, em [CERTIFICADO], o thumbprint_padrao para todos), como
+explicado em "CLIENTE SEM CERTIFICADO (PROCURACAO)" abaixo.
+
+Se a letra Z: nao existir (por exemplo, em tarefa agendada), o
+programa usa o caminho de rede indicado no lote.ini, em [REDE].
+
+
 PRECISA DE UM CLIENTE NOVO?
 ------------------------------------------------------------------
-Copie esta pasta inteira (com outro nome, ex: "NFS-e - Nome do
-Cliente"), e edite o config.ini da copia com os dados do novo
-cliente. Nao precisa reinstalar nada.
+No modo em lote, basta incluir uma linha no clientes.csv.
+No modo de um cliente, copie esta pasta inteira (com outro nome, ex:
+"NFS-e - Nome do Cliente") e edite o config.ini da copia com os dados
+do novo cliente. Nao precisa reinstalar nada.
+
+
+CLIENTE SEM CERTIFICADO (PROCURACAO)
+------------------------------------------------------------------
+Se o cliente nao tem certificado digital, mas deu procuracao
+eletronica (e-CAC) ao CPF ou CNPJ do SEU certificado, o programa pode
+consultar as notas dele usando o SEU certificado:
+
+1. No config.ini, em [CLIENTE] -> cnpj, continue colocando o CNPJ do
+   CLIENTE.
+2. Em [CERTIFICADO] -> thumbprint, coloque o thumbprint (impressao
+   digital) do SEU certificado -- e nao do certificado do cliente.
+   Para achar: tecle Win+R, digite certmgr.msc, va em Pessoal >
+   Certificados, de dois cliques no seu certificado, aba "Detalhes",
+   campo "Impressao digital". Copie e cole no config.ini.
+3. Seu certificado precisa estar instalado neste computador, e a
+   procuracao precisa estar valida para ele. Cada pessoa deve usar o
+   proprio certificado, com procuracao para o proprio CPF.
+
+Importante: esse acesso funcionou nos testes feitos com clientes que
+tem procuracao, mas nao esta descrito na documentacao oficial da
+NFS-e Nacional e pode mudar. Tambem ainda nao foi testado o que
+acontece quando NAO ha procuracao. Se uma consulta for recusada,
+confira a procuracao no e-CAC.
 
 
 SE DER ALGUM ERRO
@@ -61,7 +159,8 @@ SE DER ALGUM ERRO
 O programa explica o problema em portugues, direto na tela, por
 exemplo:
   - CNPJ ou data preenchidos errado no config.ini
-  - certificado digital do cliente nao encontrado neste computador
+  - certificado digital nao encontrado neste computador (ou
+    thumbprint informado errado ou vencido)
   - pasta de destino (ex: unidade de rede Z:) fora do ar
 
 A mensagem de erro ja diz o que fazer para corrigir. Se nao

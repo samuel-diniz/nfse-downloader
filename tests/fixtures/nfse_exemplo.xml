@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NFS-e FICTICIA, usada so nos testes. Todos os dados (CNPJ, CPF, nomes, enderecos) sao inventados. -->
+<NFSe xmlns="http://www.sped.fazenda.gov.br/nfse" versao="1.00">
+  <infNFSe Id="NFS35039012212345678000199000000000000126101234567890">
+    <xLocEmi>Arujá</xLocEmi>
+    <xLocPrestacao>Arujá</xLocPrestacao>
+    <nNFSe>1</nNFSe>
+    <cLocIncid>3503901</cLocIncid>
+    <xLocIncid>Arujá</xLocIncid>
+    <xTribNac>Medicina veterinária e congêneres.</xTribNac>
+    <verAplic>SefinNacional_1.6.0</verAplic>
+    <ambGer>2</ambGer>
+    <tpEmis>1</tpEmis>
+    <procEmi>1</procEmi>
+    <cStat>100</cStat>
+    <dhProc>2026-10-15T10:30:00-03:00</dhProc>
+    <nDFSe>1</nDFSe>
+    <emit>
+      <CNPJ>12345678000199</CNPJ>
+      <xNome>EXEMPLO COMERCIO LTDA</xNome>
+      <enderNac>
+        <xLgr>RUA DOS EXEMPLOS</xLgr>
+        <nro>100</nro>
+        <xBairro>CENTRO</xBairro>
+        <cMun>3503901</cMun>
+        <UF>SP</UF>
+        <CEP>07400000</CEP>
+      </enderNac>
+      <fone>1140000000</fone>
+      <email>contato@exemplo.com.br</email>
+    </emit>
+    <valores>
+      <vLiq>100.00</vLiq>
+    </valores>
+    <DPS>
+      <infDPS>
+        <tpAmb>1</tpAmb>
+        <dhEmi>2026-10-15T10:29:50-03:00</dhEmi>
+        <verAplic>teste</verAplic>
+        <serie>1</serie>
+        <nDPS>1</nDPS>
+        <dCompet>2026-10-15</dCompet>
+        <tpEmit>1</tpEmit>
+        <cLocEmi>3503901</cLocEmi>
+        <prest>
+          <CNPJ>12345678000199</CNPJ>
+          <fone>11940000000</fone>
+          <email>contato@exemplo.com.br</email>
+          <regTrib>
+            <opSimpNac>3</opSimpNac>
+            <regApTribSN>1</regApTribSN>
+            <regEspTrib>0</regEspTrib>
+          </regTrib>
+        </prest>
+        <toma>
+          <CPF>12345678909</CPF>
+          <xNome>FULANO DE TAL</xNome>
+          <end>
+            <endNac>
+              <cMun>3550308</cMun>
+              <CEP>01001000</CEP>
+            </endNac>
+            <xLgr>RUA DA AMOSTRA</xLgr>
+            <nro>10</nro>
+            <xBairro>SE</xBairro>
+          </end>
+        </toma>
+        <serv>
+          <locPrest>
+            <cLocPrestacao>3503901</cLocPrestacao>
+          </locPrest>
+          <cServ>
+            <cTribNac>050801</cTribNac>
+            <xDescServ>Serviço de teste&#10;- ITEM 1 - 1x R$100,00. Total: R$100,00</xDescServ>
+          </cServ>
+          <infoCompl>
+            <xInfComp>Valor aproximado dos tributos: R$ 0,00 federal, R$ 0,00 estadual e R$ 5,00 municipal. Fonte: IBPT.</xInfComp>
+          </infoCompl>
+        </serv>
+        <valores>
+          <vServPrest>
+            <vServ>100.00</vServ>
+          </vServPrest>
+          <trib>
+            <tribMun>
+              <tribISSQN>1</tribISSQN>
+              <tpRetISSQN>1</tpRetISSQN>
+            </tribMun>
+            <tribFed>
+              <piscofins>
+                <CST>00</CST>
+                <tpRetPisCofins>0</tpRetPisCofins>
+              </piscofins>
+            </tribFed>
+            <totTrib>
+              <pTotTribSN>0.00</pTotTribSN>
+            </totTrib>
+          </trib>
+        </valores>
+      </infDPS>
+    </DPS>
+  </infNFSe>
+</NFSe>
